@@ -1,5 +1,7 @@
-
 from ..dataset import Sample, Subset, ClassificationDataset
+import pickle
+import numpy as np
+import os
 
 class PetsDataset(ClassificationDataset):
     '''
@@ -23,17 +25,62 @@ class PetsDataset(ClassificationDataset):
 
         # TODO implement
         # See the CIFAR-10 website on how to load the data files
+        
+        def unpickle(file):
+            with open(file, 'rb') as fo:
+                dict = pickle.load(fo, encoding='bytes')
+            return dict
+        
+        
+        f_names = []
+        if subset == Subset.TRAINING:
+            for i in range(1, 5):
+                f_names.append(os.path.join(fdir, 'data_batch_{}'.format(i)))
+        elif subset == Subset.VALIDATION:
+            f_names.append(os.path.join(fdir, 'data_batch_5'))
+        elif subset == Subset.TEST:
+            f_names.append(os.path.join(fdir, 'test_batch'))
 
-        pass
+        for file in f_names:
+            if not os.path.exists(file):
+                raise ValueError("Either fdir is not a directory or there is no file in it.")
+        
+        cifar_dicts=[]
+        for file in f_names:
+            cifar_dicts.append(unpickle(file))
+        
+        images_raw = []
+        labels_raw = []
+        for diz in cifar_dicts:
+            images_raw.extend(diz[b'data'])
+            labels_raw.extend(diz[b'labels'])
+            
+        images = []
+        labels = []
+        
+        def _convert_imgs(raw):
+            img = raw.reshape(3, 32, 32)
+            img = np.einsum('abc->bca', img)
+            return img[..., ::-1]
+        
+        for i in range(len(labels)):
+            if labels[i] == 3:  # cats 
+                labels.append(0)
+                images.append(np.asarray(_convert_imgs(i)))
+            elif labels[i] == 5:  # dogs 
+                labels.append(1)
+                images.append(np.asarray(_convert_imgs(i)))
+
+        self.images = images
+        self.labels = labels
 
     def __len__(self) -> int:
         '''
         Returns the number of samples in the dataset.
         '''
 
-        # TODO implement
+        return len(self.images)
 
-        pass
 
     def __getitem__(self, idx: int) -> Sample:
         '''
@@ -41,7 +88,10 @@ class PetsDataset(ClassificationDataset):
         Raises IndexError if the index is out of bounds. Negative indices are not supported.
         '''
 
-        # TODO implement
+        if idx >= self.__len__() or idx < 0:
+            raise IndexError("Index out of bounds: valid input range:{} while provided index:{}".format([0, self.__len__()-1], idx))
+        else:
+            return self.images[idx]
 
         pass
 
@@ -50,6 +100,4 @@ class PetsDataset(ClassificationDataset):
         Returns the number of classes.
         '''
 
-        # TODO implement
-
-        pass
+        np.unique(self.labels).__len__()
