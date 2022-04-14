@@ -85,5 +85,12 @@ def rcrop(sz: int, pad: int, pad_mode: str) -> Op:
 
     # TODO implement
     # https://numpy.org/doc/stable/reference/generated/numpy.pad.html will be helpful
-
-    pass
+    def cropped(sample: np.ndarray) -> np.ndarray:
+        if pad > 0:
+            sample = np.pad(sample, pad, pad_mode)
+        h, w, _ = sample.shape
+        if sz > h or sz > w:
+            raise ValueError("square size bigger than one of dimensions")
+        top, left = np.random.randint(0, w-sz), np.random.randint(0, h-sz)
+        return sample[top:top+sz, left:left+sz, :]
+    return cropped
