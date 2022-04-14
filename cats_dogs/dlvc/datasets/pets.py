@@ -99,5 +99,4 @@ class PetsDataset(ClassificationDataset):
         '''
         Returns the number of classes.
         '''
-
-        np.unique(self.labels).__len__()
+        return len(np.unique(self.labels))
