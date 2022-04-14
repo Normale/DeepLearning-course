@@ -63,13 +63,13 @@ class PetsDataset(ClassificationDataset):
             img = np.einsum('abc->bca', img)
             return img[..., ::-1]
         
-        for i in range(len(labels)):
-            if labels[i] == 3:  # cats 
+        for i in range(len(labels_raw)):
+            if labels_raw[i] == 3:  # cats 
                 labels.append(0)
-                images.append(np.asarray(_convert_imgs(i)))
-            elif labels[i] == 5:  # dogs 
+                images.append(np.asarray(_convert_imgs(images_raw[i])))
+            elif labels_raw[i] == 5:  # dogs 
                 labels.append(1)
-                images.append(np.asarray(_convert_imgs(i)))
+                images.append(np.asarray(_convert_imgs(images_raw[i])))
 
         self.images = images
         self.labels = labels
