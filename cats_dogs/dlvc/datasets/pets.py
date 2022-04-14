@@ -91,7 +91,7 @@ class PetsDataset(ClassificationDataset):
         if idx >= self.__len__() or idx < 0:
             raise IndexError("Index out of bounds: valid input range:{} while provided index:{}".format([0, self.__len__()-1], idx))
         else:
-            return self.images[idx]
+            return Sample(idx, self.images[idx], self.labels[idx])
 
         pass
 
