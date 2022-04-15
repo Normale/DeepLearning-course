@@ -24,8 +24,10 @@ def type_cast(dtype: np.dtype) -> Op:
     '''
 
     # TODO implement (see above for guidance).
+    def cast(sample: np.ndarray) -> np.ndarray:
+        return sample.astype(dtype)
 
-    pass
+    return cast
 
 def vectorize() -> Op:
     '''
@@ -33,44 +35,45 @@ def vectorize() -> Op:
     '''
 
     # TODO implement (see above for guidance).
-
-    pass
+    return np.ravel
 
 def add(val: float) -> Op:
     '''
     Add a scalar value to all array elements.
     '''
 
-    # TODO implement (see above for guidance).
-
-    pass
+    def add_value(sample: np.ndarray) -> np.ndarray:
+        return sample + val
+    return add_value
 
 def mul(val: float) -> Op:
     '''
     Multiply all array elements by the given scalar.
     '''
 
-    # TODO implement (see above for guidance).
-
-    pass
+    def multiply_value(sample: np.ndarray) -> np.ndarray:
+        return sample * val
+    return multiply_value
 
 def hwc2chw() -> Op:
     '''
     Flip a 3D array with shape HWC to shape CHW.
     '''
+    def flipped(sample: np.ndarray) -> np.ndarray:
+        return sample.transpose(2, 0, 1)
+    return flipped
 
-    # TODO implement (see np.transpose)
-
-    pass
 
 def hflip() -> Op:
     '''
     Flip arrays with shape HWC horizontally with a probability of 0.5.
     '''
-
-    # TODO implement (numpy.flip will be helpful)
-
-    pass
+    def flipped(sample: np.ndarray) -> np.ndarray:
+        if np.random.choice([True, False]):
+            return np.flip(sample, (0,2))
+        else:
+            return sample
+    return flipped
 
 def rcrop(sz: int, pad: int, pad_mode: str) -> Op:
     '''
@@ -82,5 +85,12 @@ def rcrop(sz: int, pad: int, pad_mode: str) -> Op:
 
     # TODO implement
     # https://numpy.org/doc/stable/reference/generated/numpy.pad.html will be helpful
-
-    pass
+    def cropped(sample: np.ndarray) -> np.ndarray:
+        if pad > 0:
+            sample = np.pad(sample, pad, pad_mode)
+        h, w, _ = sample.shape
+        if sz > h or sz > w:
+            raise ValueError("square size bigger than one of dimensions")
+        top, left = np.random.randint(0, w-sz), np.random.randint(0, h-sz)
+        return sample[top:top+sz, left:left+sz, :]
+    return cropped
